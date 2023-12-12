@@ -1,0 +1,10 @@
+*.secrets.*
+.cache
+.env
+dist
+node_modules
+docker-compose.override.yml
+docker-compose.misc.yml
+
+apps/accounter/data
+

@@ -1,0 +1,23 @@
+{
+  "name": "@draserver/common",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "clean": "rimraf .cache .rollup.cache dist",
+    "prebuild": "npm run clean",
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11"
+  },
+  "imports": {
+    "#package.json": "./package.json"
+  }
+}
