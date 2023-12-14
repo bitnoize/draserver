@@ -1,12 +1,16 @@
 import pg from 'pg'
-import { PostgresServiceOptions } from '../interfaces/postgres.js'
-import { Setting } from '../interfaces/setting.js'
 import {
-  isRowId,
-  isRowCount,
+  Category,
+  Setting,
+  isRowCategory,
+  buildCategory,
   isRowsSettings,
-  buildSettings
-} from '../helpers/postgres.js'
+  buildSettings,
+  isRowLogDataLogId,
+  isRowLogData,
+  buildLogData,
+} from '@draserver/common'
+import { PostgresServiceOptions } from '../interfaces/postgres.js'
 import { logger } from '../logger.js'
 
 export class PostgresService {
@@ -22,8 +26,9 @@ export class PostgresService {
       allowExitOnIdle: true
     })
 
-    pg.types.setTypeParser(pg.types.builtins.INT8, (value: string): number =>
-      parseInt(value)
+    pg.types.setTypeParser(
+      pg.types.builtins.INT8,
+      (value: string): number => parseInt(value)
     )
 
     logger.info(`PostgresService initialized`)
@@ -45,6 +50,34 @@ export class PostgresService {
     }
 
     return this._instance
+  }
+
+  async getCategory(domainName: string): Promise<Category | undefined> {
+    const client = await this.pool.connect()
+
+    try {
+      const resultSelectCategory = await client.query(
+        this.selectCategoryByDomainNameSql,
+        [domainName]
+      )
+
+      if (resultSelectCategory.rowCount === 0) {
+        return undefined
+      }
+
+      const rowSelectCategory = resultSelectCategory.rows.shift()
+      if (!isRowCategory(rowSelectCategory)) {
+        throw new Error(`selected category malformed result`)
+      }
+
+      const category = buildCategory(rowSelectCategory)
+
+      return category
+    } catch (error) {
+      throw error
+    } finally {
+      client.release()
+    }
   }
 
   async getSettings(): Promise<Setting[]> {
@@ -69,4 +102,115 @@ export class PostgresService {
       client.release()
     }
   }
+
+  async newLogData(
+    domainName: string,
+    reqUrl: string,
+    redirCategoryId: number | null,
+    redirUrl: string,
+    redirType: number
+  ): Promise<void> {
+    const client = await this.pool.connect()
+
+    try {
+      await client.query('BEGIN')
+
+      if (redirCategoryId !== null) {
+        const resultSelectCategory = await client.query(
+          this.selectCategoryByCategoryIdSql + 'FOR SHARE',
+          [redirCategoryId]
+        )
+
+        if (resultSelectCategory.rowCount === 0) {
+          throw new Error(`expected Category does not exists`)
+        }
+      }
+
+      const resultInsertLogData = await client.query(
+        this.insertLogDataSql,
+        [
+          domainName,
+          reqUrl,
+          redirCategoryId,
+          redirUrl,
+          redirType
+        ]
+      )
+
+      const rowInsertLogData = resultInsertLogData.rows.shift()
+      if (!isRowId(rowInsertLogData)) {
+        throw new Error(`insert LogData malformed result`)
+      }
+
+      const resultSelectLogData = await client.query(
+        this.selectLogDataByIdSql + 'FOR SHARE',
+        [rowInsertLogData.id]
+      )
+
+      const logData = buildLogData(rowSelectLogData)
+
+    } catch (error) {
+      await client.query('ROLLBACK')
+
+      throw error
+    } finally {
+      client.release()
+    }
+  }
+
+  private readonly selectCategoryByCategoryIdSql = `
+SELECT
+  category_id,
+  category_name,
+  category_redirect_url,
+  category_domain_count,
+  category_redirect_type
+FROM "Categories"
+WHERE category_id = $1
+`
+
+  private readonly selectCategoryByDomainNameSql = `
+SELECT
+  category_id,
+  category_name,
+  category_redirect_url,
+  category_domain_count,
+  category_redirect_type
+FROM "Categories"
+WHERE category_id = (
+  SELECT category_id FROM "CategoryDomains" WHERE domain_name = $1
+)
+`
+
+  private readonly selectSettingsSql = `
+SELECT
+  setting_id, setting_name, setting_value_int, setting_value_string
+FROM "Settings"
+ORDER BY setting_id ASC
+`
+
+  private readonly insertLogDataSql = `
+INSERT INTO "LogData" (
+  domain_name,
+  req_url,
+  redir_category_id,
+  redir_url,
+  redir_type
+)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING log_id
+`
+
+  private readonly selectLogDataByLogIdSql = `
+SELECT
+  log_id,
+  log_date,
+  domain_name,
+  req_url,
+  redir_category_id,
+  redir_url,
+  redir_type
+FROM "LogData"
+WHERE log_id = $1
+`
 }

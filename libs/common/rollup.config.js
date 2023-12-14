@@ -1,10 +1,10 @@
 import pkg from '#package.json' assert { type: 'json' }
-import typescript from '@rollup/plugin-typescript'
 import json from '@rollup/plugin-json'
+import typescript from '@rollup/plugin-typescript'
 import terser from '@rollup/plugin-terser'
 
 const external = Object.keys(pkg.dependencies).concat(['#package.json'])
-const plugins = [typescript(), json()]
+const plugins = [json(), typescript()]
 
 if (process.env.NODE_ENV === 'production') {
   plugins.push(terser())

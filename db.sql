@@ -48,7 +48,7 @@ GRANT USAGE, SELECT ON "CategoryDomains_domain_id_seq" TO draserver_admin;
 CREATE INDEX "CategoryDomains_category_id_key" ON "CategoryDomains" (category_id);
 
 --
--- CategoryDomains
+-- Settings
 --
 
 CREATE TABLE "Settings" (
@@ -73,6 +73,10 @@ INSERT INTO "Settings" (
 VALUES
   ('Default redirect URL', NULL, 'https://uslugipoisk.ru'),
   ('Default redirect type', 302, NULL);
+
+--
+-- LogData
+--
 
 CREATE TABLE "LogData" (
   log_id                  INTEGER GENERATED ALWAYS AS IDENTITY,
