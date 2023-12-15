@@ -1,4 +1,4 @@
-import express, { Application, ErrorRequestHandler } from 'express'
+import express, { Application, RequestHandler, ErrorRequestHandler } from 'express'
 import createError, { HttpError } from 'http-errors'
 import { AppOptions, Controller } from './interfaces/app.js'
 import { SettingsController } from './controllers/settings.js'

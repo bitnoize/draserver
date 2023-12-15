@@ -1,4 +1,3 @@
-import { RowId, RowCount } from '../interfaces/postgres.js'
 import {
   RowCategoryCategoryId,
   RowCategory,
@@ -55,10 +54,10 @@ export const isRowCategory = (row: unknown): row is RowCategory => {
 export const buildCategory = (row: RowCategory): Category => {
   const category: Category = {
     categoryId: row.category_id,
-    categoryName: category_name,
-    categoryRedirectUrl: category_redirect_url,
-    categoryDomainCount: category_domain_count,
-    categoryRedirectType: category_redirect_type
+    categoryName: row.category_name,
+    categoryRedirectUrl: row.category_redirect_url,
+    categoryDomainCount: row.category_domain_count,
+    categoryRedirectType: row.category_redirect_type
   }
 
   return category
@@ -108,7 +107,7 @@ export const buildCategoryDomain = (row: RowCategoryDomain): CategoryDomain => {
   const categoryDomain: CategoryDomain = {
     domainId: row.domain_id,
     categoryId: row.category_id,
-    domainName: domain_name
+    domainName: row.domain_name
   }
 
   return categoryDomain

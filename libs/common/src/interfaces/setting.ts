@@ -4,9 +4,9 @@ export interface RowSettingSettingId {
 
 export interface RowSetting {
   setting_id: number
-  setting_name: number
-  setting_value_int: number
-  setting_value_string: string
+  setting_name: string
+  setting_value_int: number | null
+  setting_value_string: string | null
 }
 
 export interface Setting {

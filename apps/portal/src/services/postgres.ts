@@ -2,6 +2,7 @@ import pg from 'pg'
 import {
   Category,
   Setting,
+  LogData,
   isRowCategory,
   buildCategory,
   isRowsSettings,
@@ -109,7 +110,7 @@ export class PostgresService {
     redirCategoryId: number | null,
     redirUrl: string,
     redirType: number
-  ): Promise<void> {
+  ): Promise<LogData> {
     const client = await this.pool.connect()
 
     try {
@@ -138,17 +139,25 @@ export class PostgresService {
       )
 
       const rowInsertLogData = resultInsertLogData.rows.shift()
-      if (!isRowId(rowInsertLogData)) {
+      if (!isRowLogDataLogId(rowInsertLogData)) {
         throw new Error(`insert LogData malformed result`)
       }
 
       const resultSelectLogData = await client.query(
-        this.selectLogDataByIdSql + 'FOR SHARE',
-        [rowInsertLogData.id]
+        this.selectLogDataByLogIdSql + 'FOR SHARE',
+        [rowInsertLogData.log_id]
       )
+
+      const rowSelectLogData = resultSelectLogData.rows.shift()
+      if (!isRowLogData(rowSelectLogData)) {
+        throw new Error(`select logData malformed result`)
+      }
 
       const logData = buildLogData(rowSelectLogData)
 
+      await client.query('COMMIT')
+
+      return logData
     } catch (error) {
       await client.query('ROLLBACK')
 

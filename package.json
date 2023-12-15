@@ -14,17 +14,12 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-terser": "^0.4.3",
-    "@rollup/plugin-typescript": "^11.1.2",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
     "eslint": "^8.44.0",
     "nodemon": "^2.0.22",
     "prettier": "^3.0.0",
     "rimraf": "^5.0.0",
-    "rollup": "^3.26.3",
-    "terser": "^5.19.2",
     "tslib": "^2.6.0",
     "typescript": "^5.0.4"
   }

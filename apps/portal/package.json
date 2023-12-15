@@ -2,17 +2,17 @@
   "name": "@draserver/portal",
   "type": "module",
   "version": "0.0.1",
-  "description": "Server project part",
+  "description": "Portal application",
   "private": true,
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
-    "clean": "rimraf .cache .rollup.cache dist",
+    "clean": "rimraf .cache dist",
     "prebuild": "npm run clean",
-    "build": "rollup -c",
-    "build:watch": "rollup -c -w",
+    "build": "tsc -b",
+    "build:watch": "tsc -b -w",
     "start": "node dist/main.js",
     "start:watch": "nodemon -q -w dist dist/main.js"
   },
@@ -29,8 +29,5 @@
     "@types/http-errors": "^2.0.1",
     "@types/pg": "^8.10.8",
     "@types/pg-pool": "^2.0.3"
-  },
-  "imports": {
-    "#package.json": "./package.json"
   }
 }

@@ -12,7 +12,7 @@ export class SettingsController extends BaseController {
     logger.info(`SettingsController registered`)
   }
 
-  welcomeHandler: RequestHandler = async (req, res): Promise<void> => {
+  welcomeHandler: RequestHandler = async (req, res, next): Promise<void> => {
     try {
       res.status(200).send('OK')
     } catch (error) {

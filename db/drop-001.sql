@@ -1,0 +1,6 @@
+
+DROP TABLE IF EXISTS "Categories";
+DROP TABLE IF EXISTS "CategoryDomains";
+DROP TABLE IF EXISTS "Settings";
+DROP TABLE IF EXISTS "LogData";
+

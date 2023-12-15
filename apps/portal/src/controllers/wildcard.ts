@@ -5,6 +5,7 @@ import {
 } from '@draserver/common'
 import { BaseController } from './base.js'
 import { AppOptions } from '../interfaces/app.js'
+import { KNOWN_PATHNAMES } from '../constants.js'
 import { logger } from '../logger.js'
 
 export class WildcardController extends BaseController {
@@ -18,23 +19,38 @@ export class WildcardController extends BaseController {
 
   defaultHandler: RequestHandler = async (req, res, next): Promise<void> => {
     try {
-      const domainName = req.get('host').replace(/^www\./, '')
-      const originalUrl = req.originalUrl
+      const reqUrl = new URL(
+        'https://' +
+        req.hostname.replace(/^www\./, '') +
+        req.originalUrl
+      )
 
       const settings = await this.postgresService.getSettings()
-      let categoryRedirectUrl = getDefaultRedirectUrl(settings)
-      let categoryRedirectType = getDefaultRedirectType(settings)
 
-      const category = await this.postgresService.getCategory(domainName)
+      let redirCategoryId: number | null = null
+      let redirUrl = new URL(getDefaultRedirectUrl(settings))
+      let redirType = getDefaultRedirectType(settings)
+
+      const category = await this.postgresService.getCategory(reqUrl.hostname)
       if (category !== undefined) {
-        categoryRedirectUrl = category.categoryRedirectUrl
-        categoryRedirectType = category.categoryRedirectType
+        redirCategoryId = category.categoryId
+        redirUrl = new URL(category.categoryRedirectUrl)
+        redirType = category.categoryRedirectType
       }
 
-      if (originalUrl.match(/^\/(robots.txt|sitemap.xml|favicon.ico)/)) {
+      if (KNOWN_PATHNAMES.includes(reqUrl.pathname)) {
+        redirUrl.pathname = reqUrl.pathname
       }
 
-      res.status(200).send('OK')
+      const logData = await this.postgresService.newLogData(
+        reqUrl.hostname,
+        reqUrl.toString(),
+        redirCategoryId,
+        redirUrl.toString(),
+        redirType
+      )
+
+      res.redirect(redirType, redirUrl.toString())
     } catch (error) {
       next(error)
     }

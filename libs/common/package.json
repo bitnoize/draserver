@@ -2,24 +2,19 @@
   "name": "@draserver/common",
   "type": "module",
   "version": "0.0.1",
-  "description": "",
+  "description": "Common library",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
-    "clean": "rimraf .cache .rollup.cache dist",
+    "clean": "rimraf .cache dist",
     "prebuild": "npm run clean",
-    "build": "rollup -c",
-    "build:watch": "rollup -c -w"
-  },
-  "dependencies": {
+    "build": "tsc -b",
+    "build:watch": "tsc -b -w"
   },
   "devDependencies": {
     "@types/node": "^18.15.11"
-  },
-  "imports": {
-    "#package.json": "./package.json"
   }
 }

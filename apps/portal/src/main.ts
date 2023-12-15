@@ -14,7 +14,7 @@ export const bootstrap = async (): Promise<void> => {
     listenPort
   })
 
-  await app.start()
+  app.start()
 }
 
 bootstrap().catch((error) => {
